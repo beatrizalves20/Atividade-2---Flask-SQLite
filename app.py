@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, request, jsonify, g, abort
+from flask import Flask, request, jsonify, g
 from Globals import DATABASE_NAME
 
 
@@ -121,43 +121,19 @@ def updateUsuario(id, data):
     return rowupdate
 
 #Rota para deletar um id (DELETE)
-@app.route("/deleteUsuario<int:id>", methods=['DELETE'] )
 def deleteUsuario(id):
-    usuario = next((usuario for usuario in  usuario if usuario['id'] == id)), None
+    # Persistir os dados no banco.
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        'DELETE FROM tb_usuario  WHERE id = ?', (id))
+    conn.commit()
 
-    if usuario:
-        usuarios.remover(id)
-        return jsonify({'message': 'id do usuario excluído'})
-    
-    else:
-        return jsonify({'message': 'id do usuario não encontrado'}), 404
+    rowdelete = cursor.rowcount
 
-
-#    conn = get_db_connection()
-#    cursor = conn.cursor()
-    
-#    try:                         
-        # VERIFICAR SE O USUÁRIO EXISTE 
-#        cursor.execute('SELECT * FROM usuario WHERE id= ?', (id))
-#        usuario = cursor.fetchone()
-
-#        if usuario is None:
-#           abort(404, description="Usuário não encontrado")
-
-        #DELETE O USUÁRIO    
-#        cursor.execute('DELETE FROM usuarios WHERE id = ?',(id))
-#        conn.commit()
-
-#       return jsonify({'message': 'Usuário deletado com sucesso'}), 200
-
-#     except sqlite3.DatabaseError as e:
-#         conn.rollback() #Reverter qualquer alteração em caso de erro 
-#         return jsonify({'error': 'Erro ao acessar o banco de dados', 'message': str(e)}), 500
-
-#    finally: 
-#        conn.close() #Garantir que a conexão seja fechada
-
-
+    conn.close()
+    # Retornar a quantidade de linhas.
+    return rowdelete
 
 @app.route("/usuarios/<int:id>", methods=['GET', 'DELETE', 'PUT'])
 def usuario(id):
@@ -174,4 +150,11 @@ def usuario(id):
         if rowupdate != 0:
             return (data, 201)
         else:
-            return (data, 304)
+            return (data, 304)      
+    elif request.method == 'DELETE': # Ira deletar um usuário se a requisição para o DELETAR
+        rowdelete = deleteUsuario(id)
+        if rowdelete != 0:
+            return {} , 200
+        else:
+            return {} , 404
+

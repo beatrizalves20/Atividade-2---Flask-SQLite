@@ -5,17 +5,17 @@ from Globals import DATABASE_NAME
 
 app = Flask(__name__)
 
-# Aqui era armazenar os dados especificos 
+# Aqui ira fazer a conexão com o banco de dado
 def get_db_connection():
     db = getattr(g, '_database', None)
     if db is None:
         db = g ._database = sqlite3.connect(DATABASE_NAME)    
     return db
-
+#Aqui ira fechar a conexão com o banco de dado 
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
-    if db is not None:  #Verifica se a conexão com o banco de dados existe.
+    if db is not None:  
         db.close()
     
 #    conn = None

@@ -151,7 +151,7 @@ def usuario(id):
             return (data, 201)
         else:
             return (data, 304)      
-    elif request.method == 'DELETE': # Ira deletar um usuário se a requisição para o DELETAR
+    elif request.method == 'DELETE': # Ira deletar um usuário se a requisição para o DELETE
         rowdelete = deleteUsuario(id)
         if rowdelete != 0:
             return {} , 200
